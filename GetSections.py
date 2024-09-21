@@ -1,7 +1,5 @@
 from testrail_api import TestRailAPI
 import requests
-from operator import itemgetter
-import operator
 
 username = 'daniel.brym@eftlab.com'
 password = '8PHo0GxLkcG2SKSM8EZL-N0bxD3gQMy3g17y.lOk6'
@@ -26,73 +24,6 @@ def get_sections(sections_url):
         else:
             break
     return list_sects
-
-
-def get_all_sections(json_url,project_id,sections=False,sub_sections=False,sub_of_sub_sections=False):
-    api = TestRailAPI(json_url, username, password)
-    response = api.get('get_sections/' + str(project_id))
-    response['sections'].sort(key=lambda x: int(x['id']), reverse=True)
-    all_sections=response['sections']
-    print("reversed: ",all_sections)
-    list_sects=[]
-    for i in range(len(all_sections['sections'])):
-        sections_depth = all_sections['sections'][i]['depth']
-        sections_id = all_sections['sections'][i]['id']
-        secions_name = all_sections['sections'][i]['name']
-
-        # print("id: ", sections_id, "name: ", secions_name, " depth: ", sections_depth)
-        # list_sects.append([{'id': sections_id, 'name': secions_name}])
-
-        if sub_of_sub_sections or (sub_sections and sub_of_sub_sections) or (sections and sub_sections and sub_of_sub_sections) or (sections and sub_of_sub_sections):
-            if sections_depth == 1 or sections_depth==0 or sections_depth==2 or sections_depth==3 or sections_depth==4:
-                print("id: ", sections_id, " name: ", secions_name,"depth: ",sections_depth)
-                list_sects.append([{'id': sections_id, 'name': secions_name}])
-        elif (sections and sub_sections) or (not sections and sub_sections):
-            if sections_depth == 1 or sections_depth==0:
-                print("id: ", sections_id, " name: ", secions_name,"depth: ",sections_depth)
-                list_sects.append([{'id': sections_id, 'name': secions_name}])
-        elif (sections and not sub_sections and not sub_of_sub_sections):
-            if sections_depth==0:
-                print("id: ", sections_id, " name: ", secions_name,"depth: ",sections_depth)
-                list_sects.append([{'id': sections_id, 'name': secions_name}])
-        else:
-            print("id: ", sections_id, " name: ", secions_name, "depth: ", sections_depth)
-            list_sects.append([{'id': sections_id, 'name': secions_name}])
-    if all_sections['_links']['next'] is not None:
-        next_url=all_sections['_links']['next']
-        while next_url is not None:
-            api_temp=TestRailAPI(json_url, username, password)
-            next_url = next_url.strip('/api/v2/')
-            next_url_temp = api_temp.get(next_url)
-            for i in range(len(next_url_temp['sections'])):
-                sections_depth = next_url_temp['sections'][i]['depth']
-                sections_id = next_url_temp['sections'][i]['id']
-                secions_name = next_url_temp['sections'][i]['name']
-                # print("id: ",sections_id,"name: ",secions_name," depth: ",sections_depth)
-                # list_sects.append([{'id': sections_id, 'name': secions_name}])
-                if sub_of_sub_sections or (sub_sections and sub_of_sub_sections) or (
-                        sections and sub_sections and sub_of_sub_sections) or (sections and sub_of_sub_sections):
-                    if sections_depth == 1 or sections_depth == 0 or sections_depth == 2 or sections_depth == 3 or sections_depth == 4:
-                        print("id: ", sections_id, " name: ", secions_name, "depth: ", sections_depth)
-                        list_sects.append([{'id': sections_id, 'name': secions_name}])
-                elif (sections and sub_sections) or (not sections and sub_sections):
-                    if sections_depth == 1 or sections_depth == 0:
-                        print("id: ", sections_id, " name: ", secions_name, "depth: ", sections_depth)
-                        list_sects.append([{'id': sections_id, 'name': secions_name}])
-                elif (sections and not sub_sections and not sub_of_sub_sections):
-                    if sections_depth == 0:
-                        print("id: ", sections_id, " name: ", secions_name, "depth: ", sections_depth)
-                        list_sects.append([{'id': sections_id, 'name': secions_name}])
-                else:
-                    print("id: ", sections_id, " name: ", secions_name, "depth: ", sections_depth)
-                    list_sects.append([{'id': sections_id, 'name': secions_name}])
-            next_url=all_sections['_links']['next']
-            if next_url is not None:
-                next_url=next_url
-                print("next page: ",next_url)
-
-    return list_sects
-
 
 def create_section(json_url,project_id, section_id, title):
     endpoint = json_url+'/index.php?/api/v2/add_section/'+str(project_id)
